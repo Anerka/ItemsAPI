@@ -37,9 +37,14 @@ namespace ItemsAPI.Services
             return _context.Rating.Where(r => r.ItemId == itemId && r.Id == ratingId).FirstOrDefault();
         }
 
-        public IEnumerable<Rating> getRatingsForItem(int itemId)
+        public IEnumerable<Rating> GetRatingsForItem(int itemId)
         {
             return _context.Rating.Where(r => r.Id == itemId).ToList();
+        }
+
+        public bool ItemExists(int itemId)
+        {
+            return _context.Items.Any(i => i.Id == itemId);
         }
     }
 }

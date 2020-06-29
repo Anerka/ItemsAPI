@@ -1,4 +1,5 @@
 ﻿using ItemsAPI.Data;
+using ItemsAPI.Entities;
 using ItemsAPI.Models;
 using ItemsAPI.Services;
 using Microsoft.AspNetCore.JsonPatch;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Controller.ItemsAPI
@@ -16,11 +18,13 @@ namespace Controller.ItemsAPI
     {
         private readonly ILogger<ItemRatingController> _logger;
         private readonly IMailService _mailService;
+        private readonly IItemInfoRepository _itemInfoRepository;
 
-        public ItemRatingController(ILogger<ItemRatingController> logger, IMailService mailService)
+        public ItemRatingController(ILogger<ItemRatingController> logger, IMailService mailService, IItemInfoRepository itemInfoRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mailService = mailService ?? throw new ArgumentNullException(nameof(mailService));
+            _itemInfoRepository = itemInfoRepository ?? throw new ArgumentNullException(nameof(itemInfoRepository));
         }
 
         [HttpGet]
@@ -29,15 +33,27 @@ namespace Controller.ItemsAPI
             try
             {
                 //throw new Exception("e example");
-                var item = ItemsDataStore.Current.Items.FirstOrDefault(x => x.Id == itemId);
-
-                if (item == null)
+                if(!_itemInfoRepository.ItemExists(itemId))
                 {
-                    _logger.LogInformation($"Item with id {itemId} wasn't found when accessing points of interest.");
+                    _logger.LogInformation($"Item with Id {itemId} wasn't found when accessing ratings");
                     return NotFound();
                 }
 
-                return Ok(item.Rating);
+                var ratingsForItem = _itemInfoRepository.GetRatingsForItem(itemId);
+
+                var ratingsForItemResults = new List<RatingDto>();
+                foreach (var rating in ratingsForItem)
+                {
+                    ratingsForItemResults.Add(new RatingDto()
+                    {
+                        Id = rating.Id,
+                        Name = rating.Name,
+                        Description = rating.Description
+                    });
+                }
+
+                return Ok(ratingsForItemResults);
+
             }
             catch (Exception e)
             {
@@ -52,21 +68,27 @@ namespace Controller.ItemsAPI
         [Route("{id}", Name = "GetItemRating")]
         public IActionResult GetRating(int itemId, int id)
         {
-            var item = ItemsDataStore.Current.Items.FirstOrDefault(x => x.Id == itemId);
-
-            if (item == null)
+            if (!_itemInfoRepository.ItemExists(itemId))
             {
+                _logger.LogInformation($"Item with Id {itemId} wasn't found when accessing ratings");
                 return NotFound();
             }
 
-            var rating = item.Rating.FirstOrDefault(x => x.Id == id);
+            var rating = _itemInfoRepository.GetRatingForItem(itemId, id);
 
             if(rating == null)
             {
                 return NotFound();
             }
 
-            return Ok(rating);
+            var ratingResult = new RatingDto()
+            {
+                Id = rating.Id,
+                Name = rating.Name,
+                Description = rating.Description
+            };
+
+            return Ok(ratingResult);
         }
 
         [HttpPost]

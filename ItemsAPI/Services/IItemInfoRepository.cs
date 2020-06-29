@@ -12,8 +12,10 @@ namespace ItemsAPI.Services
 
         Item GetItem(int itemId, bool includeRating);
 
-        IEnumerable<Rating> getRatingsForItem(int itemId);
+        IEnumerable<Rating> GetRatingsForItem(int itemId);
 
         Rating GetRatingForItem(int itemId, int ratingId);
+
+        bool ItemExists(int itemId);
     }
 }
