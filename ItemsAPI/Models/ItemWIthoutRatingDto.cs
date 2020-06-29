@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ItemsAPI.Models
 {
-    public class ItemWIthoutRatingDto
+    public class ItemWithoutRatingDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

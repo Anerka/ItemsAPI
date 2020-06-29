@@ -1,3 +1,4 @@
+using System;
 using ItemsAPI.Context;
 using ItemsAPI.Services;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
+using AutoMapper;
 using Microsoft.Extensions.Configuration;
 
 namespace ItemsAPI
@@ -45,6 +47,8 @@ namespace ItemsAPI
             });
 
             services.AddScoped<IItemInfoRepository, ItemInfoRepository>();
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

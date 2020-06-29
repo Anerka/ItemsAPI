@@ -9,22 +9,25 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 
 namespace Controller.ItemsAPI
 {
     [Route("api/items/{itemId}/itemrating")]
     [ApiController]
-    public class ItemRatingController : ControllerBase
+    public class RatingController : ControllerBase
     {
-        private readonly ILogger<ItemRatingController> _logger;
+        private readonly ILogger<RatingController> _logger;
         private readonly IMailService _mailService;
         private readonly IItemInfoRepository _itemInfoRepository;
+        private readonly IMapper _mapper;
 
-        public ItemRatingController(ILogger<ItemRatingController> logger, IMailService mailService, IItemInfoRepository itemInfoRepository)
+        public RatingController(ILogger<RatingController> logger, IMailService mailService, IItemInfoRepository itemInfoRepository, IMapper mapper)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mailService = mailService ?? throw new ArgumentNullException(nameof(mailService));
             _itemInfoRepository = itemInfoRepository ?? throw new ArgumentNullException(nameof(itemInfoRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpGet]
@@ -41,19 +44,20 @@ namespace Controller.ItemsAPI
 
                 var ratingsForItem = _itemInfoRepository.GetRatingsForItem(itemId);
 
-                var ratingsForItemResults = new List<RatingDto>();
-                foreach (var rating in ratingsForItem)
-                {
-                    ratingsForItemResults.Add(new RatingDto()
-                    {
-                        Id = rating.Id,
-                        Name = rating.Name,
-                        Description = rating.Description
-                    });
-                }
+                //var ratingsForItemResults = new List<RatingDto>();
+                //foreach (var rating in ratingsForItem)
+                //{
+                //    ratingsForItemResults.Add(new RatingDto()
+                //    {
+                //        Id = rating.Id,
+                //        Name = rating.Name,
+                //        Description = rating.Description
+                //    });
+                //}
 
-                return Ok(ratingsForItemResults);
+                //return Ok(ratingsForItemResults);
 
+                return Ok(_mapper.Map<IEnumerable<RatingDto>>(ratingsForItem));
             }
             catch (Exception e)
             {
@@ -81,14 +85,16 @@ namespace Controller.ItemsAPI
                 return NotFound();
             }
 
-            var ratingResult = new RatingDto()
-            {
-                Id = rating.Id,
-                Name = rating.Name,
-                Description = rating.Description
-            };
+            //var ratingResult = new RatingDto()
+            //{
+            //    Id = rating.Id,
+            //    Name = rating.Name,
+            //    Description = rating.Description
+            //};
 
-            return Ok(ratingResult);
+            //return Ok(ratingResult);
+
+            return Ok(_mapper.Map<RatingDto>(rating));
         }
 
         [HttpPost]
